@@ -16,9 +16,10 @@ namespace AS
         CharacterStats _player;
         private Dictionary<SkillType, Action> _actions;
 
+   
         private void Start()
         {
-            _player = FindObjectOfType<TargetLockOn>().GetComponent<CharacterStats>();
+            _player = FindObjectOfType<PlayerStats>().GetComponent<CharacterStats>();
         }
 
         public event Action ExecuteBonus;
@@ -33,6 +34,7 @@ namespace AS
 
             };
             _actions[value]?.Invoke();
+            
         }
 
         private void SetDamagRandom() => _player.GetComponentInChildren<ShotHandler>().JustShot(true);

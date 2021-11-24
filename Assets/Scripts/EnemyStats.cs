@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -15,8 +16,8 @@ namespace AS
             MaxHealth = SetMaxHealthFromHealthLevelFormula();
             CurrentHealth = MaxHealth;
             _healthBar.SetMaxHealth(MaxHealth);
+            _healthBar.SetCurrentSkill(_skillType);
         }
-
         private int SetMaxHealthFromHealthLevelFormula()
         {
             MaxHealth = HealthLevel * 3;

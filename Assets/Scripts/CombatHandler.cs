@@ -9,7 +9,7 @@ namespace AS
 {
     public class CombatHandler : MonoBehaviour
     {
-        public RoundData _roundData;
+
         [SerializeField] private int _roundCount = 0;
         [SerializeField] private bool _endRound = false;
         ISkill _skill;
@@ -20,6 +20,8 @@ namespace AS
         private List<CharacterStats> _remainingEnemies;
         private List<CharacterStats> _remainingAllies;
         //private List<AbilityComponent> abilityComponents;
+
+        private VictoryWindow _victoryWindow;
 
         private CharacterStats _currentActiveUnit;
         [HideInInspector] public CharacterStats _currentAIUnitTarget;
@@ -44,20 +46,25 @@ namespace AS
                 _instance = this;
 
             }
-
+            ServiceLocator.Resolve<GameStarter>().roundData.EndRound = false;
+            ServiceLocator.Resolve<GameStarter>().roundData.RoundCount = 0;
             _skill = gameObject.GetOrAddComponent<Skill>();
             _combatants = new List<CharacterStats>();
             _remainingAllies = new List<CharacterStats>();
             _remainingEnemies = new List<CharacterStats>();
             _playerTeam = FindObjectsOfType<PlayerStats>();
             _enemyTeam = FindObjectsOfType<EnemyStats>();
+            _victoryWindow = FindObjectOfType<VictoryWindow>();
+            _victoryWindow.gameObject.SetActive(false);
+
+            InitPlayers();
+            InitEnemies();
+            SetSkills();
         }
 
         private void Start()
         {
-            InitPlayers();
-            InitEnemies();
-            SetSkills();
+           
             InvokeRepeating(nameof(CheckNewRound), 1, 0.2f);
             Battle();
         }
@@ -73,7 +80,11 @@ namespace AS
 
             if (_remainingEnemies.Count == 0)
             {
+               
                 Debug.Log("Victory");
+                _victoryWindow.gameObject.SetActive(true);
+               
+
             }
             else
             {
@@ -97,11 +108,10 @@ namespace AS
                         _remainingAllies.Remove(_currentActiveUnit);
                     }
 
-                    //Battle();
+                    Battle();
                 }
             }
         }
-
         public void CheckingTarget()
         {
             if (_currentActiveUnit.CompareTag("Enemy"))
@@ -118,7 +128,6 @@ namespace AS
                 _waitingForPlayerAction = true;
             }
         }
-
         public void AIAttackAction()
         {
             var shotHandler = _currentActiveUnit.GetComponentInChildren<ShotHandler>();
@@ -126,13 +135,13 @@ namespace AS
             _currentActiveUnit.IsEndRound = true;
             StartCoroutine(nameof(WaitForTurn));
         }
-
         public void PlayerAttackAction()
         {
             if (!_waitingForPlayerAction) return;
 
             var shotHandler = _currentActiveUnit.GetComponentInChildren<ShotHandler>();
-            var targetLockOn = _currentActiveUnit.GetComponent<TargetLockOn>();
+            //     var targetLockOn = _currentActiveUnit.GetComponent<TargetLockOn>();
+            var targetLockOn = ServiceLocator.Resolve<GameStarter>().targetLockOn;
 
             if (!targetLockOn.currentEnemy) return;
 
@@ -141,13 +150,16 @@ namespace AS
             _currentActiveUnit.IsEndRound = true;
             StartCoroutine(nameof(WaitForTurn));
         }
-
         private IEnumerator WaitForTurn()
         {
             yield return new WaitForSeconds(1);
             Battle();
         }
-
+        private IEnumerator WaitForEndRound()
+        {
+            yield return new WaitForSeconds(1);
+            ServiceLocator.Resolve<GameStarter>().roundData.EndRound = true;
+        }
         private void InitPlayers()
         {
             foreach (PlayerStats playerStats in _playerTeam)
@@ -156,7 +168,6 @@ namespace AS
                 _remainingAllies.Add(playerStats);
             }
         }
-
         private void InitEnemies()
         {
             foreach (EnemyStats enemyStats in _enemyTeam)
@@ -165,7 +176,6 @@ namespace AS
                 _remainingEnemies.Add(enemyStats);
             }
         }
-
         private void SetSkills()
         {
             var count = Enum.GetValues(typeof(SkillType)).Length;
@@ -176,21 +186,32 @@ namespace AS
                 tanks.Skill = _skill;
             }
         }
-
         private void CheckNewRound()
         {
-            if (CheckEndRound() && _roundData.EndRound)
+            if (CheckEndRound())// && ServiceLocatorMonoBehavior.GetService<GameService>().roundData.EndRound)
             {
-                foreach (var item in _combatants)
+
+                if   (ServiceLocator.Resolve<GameStarter>().roundData.EndRound)
                 {
-                    item.IsEndRound = false;
+
+                    foreach (var item in _combatants)
+                    {
+                        item.IsEndRound = false;
+                    }
+                    _endRound = false;
+                    _roundCount = _roundCount + 1;
+                    ServiceLocator.Resolve<GameStarter>().roundData.EndRound = false;
+                    ServiceLocator.Resolve<GameStarter>().roundData.RoundCount = _roundCount;
+                    StopCoroutine(nameof(WaitForEndRound));
+                    // SetSkills();
+                    Battle();
+
                 }
-                _endRound = false;
-                _roundCount = _roundCount + 1;
-                _roundData.EndRound = false;
-                _roundData.RoundCount = _roundCount;
-                SetSkills();
-                Battle();
+                else if(_endRound)
+                {
+                    StartCoroutine(nameof(WaitForEndRound));
+                }
+
 
             }
         }
