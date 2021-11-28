@@ -21,6 +21,10 @@ namespace AS
         {
             _slider.maxValue = maxHealth;
             _slider.value = maxHealth;
+            
+            if (!isActiveAndEnabled)
+                gameObject.SetActive(true);
+
         }
         public void SetCurrentHealth(int currentHealth)
         {
@@ -30,9 +34,10 @@ namespace AS
             }
             _slider.value = currentHealth;
         }
-        public void SetCurrentSkill(SkillType skillType)
+        public void SetCurrentSkill(SkillData skillData)
         {
-            _image.sprite = Extenshion.GetSpriteBySkillType(skillType);
+            if (skillData == null) return;
+            _image.sprite = Extenshion.GetSpriteBySkillType(skillData.SkillType);
         }
 
     }
