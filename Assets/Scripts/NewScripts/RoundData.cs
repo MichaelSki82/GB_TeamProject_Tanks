@@ -13,9 +13,10 @@ namespace AS
         [SerializeField] private List<ISkill> skil;
         [SerializeField] private Skills skills;
         [SerializeField] private int enemyCntOnStart = 3;
+        [SerializeField] private int playerCntOnStart = 2;
         [SerializeField] private List<TransformsData> transformForInstantiateEnemy;
         [SerializeField] private TransformsData transformForInstantiatePlayer;
-
+        [SerializeField] private TransformsData transformForInstantiatePlayer2;
         [SerializeField] private Dictionary<SkillType, Sprite> _skilsImages;
         public bool EndRound { get => endRound; set => endRound = value; }
         public int RoundCount { get => roundCount; set => roundCount = value; }
@@ -24,5 +25,7 @@ namespace AS
         public int EnemyCntOnStart { get => enemyCntOnStart; set => enemyCntOnStart = value; }
         public List<TransformsData> TransformForInstantiateEnemy { get => transformForInstantiateEnemy; set => transformForInstantiateEnemy = value; }
         public TransformsData TransformForInstantiatePlayer { get => transformForInstantiatePlayer; set => transformForInstantiatePlayer = value; }
+        public TransformsData TransformForInstantiatePlayer2 { get => transformForInstantiatePlayer; set => transformForInstantiatePlayer = value; }
+        public int PlayerCntOnStart { get => playerCntOnStart; set => playerCntOnStart = value; }
     }
 }

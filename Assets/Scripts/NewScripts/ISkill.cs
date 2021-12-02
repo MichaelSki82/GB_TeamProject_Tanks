@@ -22,7 +22,7 @@ namespace AS
             _player = FindObjectOfType<PlayerStats>().GetComponent<CharacterStats>();
         }
 
-        public event Action ExecuteBonus;
+        //public event Action ExecuteBonus;
 
         public void ExecuteSkill(SkillType value)
         {
